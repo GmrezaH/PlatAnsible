@@ -1,0 +1,36 @@
+---
+
+- name: Zabbix agent2 | Install zabbix-agent2 package
+  ansible.builtin.package:
+    name: "zabbix-agent2"
+    state: present
+  tags:
+    - bootstrap
+    - zabbix-agent2
+
+- name: Zabbix agent2 | Template zabbix agent configuration
+  ansible.builtin.template:
+    src: zabbix_agent2.conf.j2
+    dest: "/etc/zabbix/zabbix_agent2.conf"
+  tags:
+    - bootstrap
+    - zabbix-agent2
+
+      #- name: Zabbix agent2 | Configure system service
+      #  ansible.builtin.copy:
+      #    dest: /etc/systemservice
+      #    owner: root
+      #    group: root
+      #    mode: '0644'
+      #    content: |
+      #     {{ system_service }} 
+      #
+- name: Zabbix agent2 | Restart zabbix agent service
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: restarted
+    enabled: yes
+  tags:
+    - bootstrap
+    - zabbix-agent2
+

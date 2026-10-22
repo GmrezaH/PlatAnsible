@@ -1,0 +1,18 @@
+---
+- name: System upgrade | APT Dist-Upgrade
+  apt:
+    update_cache: true
+    upgrade: dist
+    autoremove: true
+    dpkg_options: force-confold,force-confdef
+  register: apt_upgrade
+  tags:
+    - system-upgrade
+
+- name: System upgrade | Reboot after APT Dist-Upgrade  # noqa no-handler
+  when:
+  - apt_upgrade.changed or system_upgrade_reboot == 'always'
+  - system_upgrade_reboot != 'never'
+  reboot:
+  tags:
+    - system-upgrade

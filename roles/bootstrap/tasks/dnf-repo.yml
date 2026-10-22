@@ -1,0 +1,36 @@
+
+- name: DNF repo | Ensure /etc/yum.repos.d/ directory exists (RHEL)
+  ansible.builtin.file:
+    path: /etc/yum.repos.d/
+    state: directory
+  tags:
+    - bootstrap
+    - dnf
+    - repository
+
+- name: DNF repo | Remove default repo files (RHEL)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/yum.repos.d/epel.repo
+    - /etc/yum.repos.d/epel-cisco-openh264.repo
+    - /etc/yum.repos.d/epel-testing.repo
+    - /etc/yum.repos.d/rocky.repo
+    - /etc/yum.repos.d/rocky-addons.repo
+    - /etc/yum.repos.d/rocky-devel.repo
+    - /etc/yum.repos.d/rocky-extras.repo
+    - /etc/yum.repos.d/rocky-security.repo
+  tags:
+    - bootstrap
+    - dnf
+    - repository
+
+- name: DNF repo | Install yum repositories (RHEL)
+  ansible.builtin.template:
+    src: local.repo.j2
+    dest: "/etc/yum.repos.d/local.repo"
+  tags:
+    - bootstrap
+    - dnf
+    - repository

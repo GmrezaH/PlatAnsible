@@ -1,0 +1,33 @@
+---
+- name: Trust CA | Target ca-certificate store file
+  set_fact:
+    ca_cert_path: |-
+      {% if ansible_os_family == "Debian" -%}
+      /usr/local/share/ca-certificates/ca.crt
+      {%- elif ansible_os_family == "RedHat" -%}
+      /etc/pki/ca-trust/source/anchors/ca.crt
+      {%- elif ansible_os_family == "Suse" -%}
+      /etc/pki/trust/anchors/ca.pem
+      {%- endif %}
+
+# - name: Trust CA | Add CA to trusted CA dir
+#   copy:
+#     src: "ca.crt"
+#     dest: "{{ ca_cert_path }}"
+#     mode: "0640"
+#   register: ca_cert
+
+- name: Trust CA | Add CA to trusted CA path
+  copy:
+    content: "{{ trusted_ca_crt }}"
+    dest: "{{ ca_cert_path }}"
+    mode: "0640"
+  register: ca_cert
+
+- name: Trust CA | Update ca-certificates (Debian/Ubuntu/SUSE)
+  command: update-ca-certificates
+  when: ca_cert.changed and ansible_os_family in ["Debian", "Suse"]
+
+- name: Trust CA | Update ca-certificates (RedHat)
+  command: update-ca-trust extract
+  when: ca_cert.changed and ansible_os_family == "RedHat"

@@ -1,0 +1,102 @@
+---
+
+- name: Firewalld | Apply firewalld rules for sshd
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    zone: "public"
+    permanent: "true"
+    state: "enabled"
+    immediate: "true"
+  loop: "{{ ssh_server_ports }}"
+  tags:
+    - sshd
+
+- name: Firewalld | Apply custom firewalld rules
+  ansible.posix.firewalld:
+    zone: "{{ item.zone | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    source: "{{ item.source | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    permanent: "{{ item.permanent | default(true) }}"
+    state: "{{ item.state | default('enabled') }}"
+    immediate: "{{ item.immediate | default(true) }}"
+  loop: "{{ firewall_rules }}"
+  when: firewall_rules is defined and firewall_rules | length > 0
+  tags:
+    - custom_firewalld
+
+      #- name: Firewalld | ETCD trusted sources
+      #  ansible.posix.firewalld:
+      #    zone: "trusted"
+      #    source: "{{ hostvars[item].ansible_host}}/32"
+      #    permanent: true
+      #    state: enabled
+      #    immediate: true
+      #  loop: "{{ groups['etcd'] + groups['kube_control_plane'] + groups['zabbix_server'] }}"
+      #  when: inventory_hostname in groups ["etcd"]
+      #  tags:
+      #    - etcd_firewalld
+      #
+      #- name: Firewalld | ETCD trusted ports
+      #  ansible.posix.firewalld:
+      #    port: "2379-2383/tcp"
+      #    zone: "trusted"
+      #    permanent: true
+      #    state: enabled
+      #    immediate: true
+      #  when: inventory_hostname in groups ["etcd"]
+      #  tags:
+      #    - etcd_firewalld
+
+- name: Firewalld | Kubernetes nodes trusted sources (kube-public)
+  ansible.posix.firewalld:
+    zone: "trusted"
+    source: "{{ hostvars[item].ip}}/32"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ groups['kube_node'] + groups['kube_control_plane'] }}"
+  when: inventory_hostname in (groups ["kube_node"] + groups ["kube_control_plane"] )
+  tags:
+    - kube_firewalld
+
+- name: Firewalld | Kubernetes nodes trusted sources (kube-private)
+  ansible.posix.firewalld:
+    zone: "trusted"
+    source: "{{ hostvars[item].ippv}}/32"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ groups['kube_node'] + groups['kube_control_plane'] }}"
+  when: inventory_hostname in (groups ["kube_node"] + groups ["kube_control_plane"] )
+  tags:
+    - kube_firewalld
+
+- name: Firewalld | Kubernetes nodes trusted sources (Kubernetes networks subnets)
+  ansible.posix.firewalld:
+    zone: "trusted"
+    source: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ kube_network_subnets }}"
+  when: inventory_hostname in (groups ["kube_node"] + groups ["kube_control_plane"] )
+  tags:
+    - kube_firewalld
+
+- name: Firewalld | Elasticsearch nodes trusted sources
+  ansible.posix.firewalld:
+    zone: "trusted"
+    source: "{{ hostvars[item].ansible_host}}/32"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ groups['es_node'] }}"
+  when: inventory_hostname in groups ["es_node"]
+  tags:
+    - es_firewalld
+
+- name: Firewalld | Restart firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: restarted

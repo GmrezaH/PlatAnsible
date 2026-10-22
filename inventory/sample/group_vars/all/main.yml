@@ -1,0 +1,5 @@
+# Main domain address
+main_domain: example.com
+
+# Main project directory
+project_dir: /opt

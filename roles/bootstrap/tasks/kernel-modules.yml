@@ -1,0 +1,31 @@
+- name: Add kernel modules and make sure it is loaded after reboots
+  community.general.modprobe:
+    name: "{{ item.name }}"
+    state: "{{ item.state | default(omit) }}"
+    params: "{{ item.params | default(omit) }}"
+    persistent: "{{ item.persistent | default(omit) }}"
+  loop: "{{ kernel_modules }}"
+  tags:
+    - modules
+    #   loop_control:
+    #     loop_var: item
+
+      #- name: Load kernel module and it's dependencies immediately
+      #  community.general.modprobe:
+      #    name: ceph
+      #    state: present
+      #
+      #- name: Ensure ceph module loads automatically on boot
+      #  ansible.builtin.copy:
+      #    dest: /etc/modules-load.d/ansible.conf
+      #    content: |
+      #      ceph
+      #    owner: root
+      #    group: root
+      #    mode: '0644'
+      #
+      #- name: Verify mount.ceph binary exists
+      #  ansible.builtin.stat:
+      #    path: /sbin/mount.ceph
+      #  register: mount_helper
+

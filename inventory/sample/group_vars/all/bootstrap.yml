@@ -1,0 +1,137 @@
+# # DNS servers
+default_dns:
+  - 8.8.8.8
+  - 1.1.1.1
+
+# # CA certificate to trust
+# trusted_ca_crt: |
+#   -----BEGIN CERTIFICATE-----
+#   MIIFkDCCA3igAwIBAgIQBZsbV56OITLiOQe9p3d1XDANBgkqhkiG9w0BAQwFADBi
+#   MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+#   d3cuZGlnaWNlcnQuY29tMSEwHwYDVQQDExhEaWdpQ2VydCBUcnVzdGVkIFJvb3Qg
+#   RzQwHhcNMTMwODAxMTIwMDAwWhcNMzgwMTE1MTIwMDAwWjBiMQswCQYDVQQGEwJV
+#   UzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQu
+#   Y29tMSEwHwYDVQQDExhEaWdpQ2VydCBUcnVzdGVkIFJvb3QgRzQwggIiMA0GCSqG
+#   SIb3DQEBAQUAA4ICDwAwggIKAoICAQC/5pBzaN675F1KPDAiMGkz7MKnJS7JIT3y
+#   ithZwuEppz1Yq3aaza57G4QNxDAf8xukOBbrVsaXbR2rsnnyyhHS5F/WBTxSD1If
+#   xp4VpX6+n6lXFllVcq9ok3DCsrp1mWpzMpTREEQQLt+C8weE5nQ7bXHiLQwb7iDV
+#   ySAdYyktzuxeTsiT+CFhmzTrBcZe7FsavOvJz82sNEBfsXpm7nfISKhmV1efVFiO
+#   DCu3T6cw2Vbuyntd463JT17lNecxy9qTXtyOj4DatpGYQJB5w3jHtrHEtWoYOAMQ
+#   jdjUN6QuBX2I9YI+EJFwq1WCQTLX2wRzKm6RAXwhTNS8rhsDdV14Ztk6MUSaM0C/
+#   CNdaSaTC5qmgZ92kJ7yhTzm1EVgX9yRcRo9k98FpiHaYdj1ZXUJ2h4mXaXpI8OCi
+#   EhtmmnTK3kse5w5jrubU75KSOp493ADkRSWJtppEGSt+wJS00mFt6zPZxd9LBADM
+#   fRyVw4/3IbKyEbe7f/LVjHAsQWCqsWMYRJUadmJ+9oCw++hkpjPRiQfhvbfmQ6QY
+#   uKZ3AeEPlAwhHbJUKSWJbOUOUlFHdL4mrLZBdd56rF+NP8m800ERElvlEFDrMcXK
+#   chYiCd98THU/Y+whX8QgUWtvsauGi0/C1kVfnSD8oR7FwI+isX4KJpn15GkvmB0t
+#   9dmpsh3lGwIDAQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
+#   hjAdBgNVHQ4EFgQU7NfjgtJxXWRM3y5nP+e6mK4cD08wDQYJKoZIhvcNAQEMBQAD
+#   ggIBALth2X2pbL4XxJEbw6GiAI3jZGgPVs93rnD5/ZpKmbnJeFwMDF/k5hQpVgs2
+#   SV1EY+CtnJYYZhsjDT156W1r1lT40jzBQ0CuHVD1UvyQO7uYmWlrx8GnqGikJ9yd
+#   +SeuMIW59mdNOj6PWTkiU0TryF0Dyu1Qen1iIQqAyHNm0aAFYF/opbSnr6j3bTWc
+#   fFqK1qI4mfN4i/RN0iAL3gTujJtHgXINwBQy7zBZLq7gcfJW5GqXb5JQbZaNaHqa
+#   sjYUegbyJLkJEVDXCLG4iXqEI2FCKeWjzaIgQdfRnGTZ6iahixTXTBmyUEFxPT9N
+#   cCOGDErcgdLMMpSEDQgJlxxPwO5rIHQw0uA5NBCFIRUBCOhVMt5xSdkoF1BN5r5N
+#   0XWs0Mr7QbhDparTwwVETyw2m+L64kW4I1NsBm9nVX9GtUw/bihaeSbSpKhil9Ie
+#   4u1Ki7wb/UdKDd9nZn6yW0HQO+T0O/QEY+nvwlQAUaCKKsnOeMzV6ocEGLPOr0mI
+#   r/OSmbaz5mEP0oUA51Aa5BuVnRmhuZyxm7EAHu/QD09CbMkKvO5D+jpxpchNJqU1
+#   /YldvIViHTLSoCtU7ZpXwdv6EM8Zt4tKG48BtieVU+i2iW1bvGjUI+iLUaJW+fCm
+#   gKDWHrO8Dw9TdSmq6hN35N6MgSGtBxBHEa2HPQfRdbzP82Z+
+#   -----END CERTIFICATE-----
+
+# OS tuning parameters
+sysctl:
+  - name: "vm.max_map_count"
+    value: "262144"
+
+# Security Limits
+limits: 
+  nofile:
+    soft: 65536
+    hard: 1048576
+  nproc:
+    soft: 65536
+    hard: 65536
+
+# Load or unload kernel modules
+# kernel_modules:
+#   - name: ceph
+#     # "present" (default), "absent"
+#     state: present
+#     params: ""
+#     # "present", "absent", "disabled" (default)
+#     persistent: present
+#   - name: libceph
+#     state: present
+#     params: ""
+#     persistent: present
+
+# YUM repository configuration
+yum_repositories:
+  - name: appstream
+    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=AppStream-$releasever
+    #baseurl: https://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/
+  - name: baseos
+    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=BaseOS-$releasever
+    #baseurl: https://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/
+  - name: epel
+    metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-9&arch=$basearch
+    #baseurl: http://10.19.161.33:8081/repository/EPEL-9-Everything-x86_64/
+  - name: CRB
+    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=CRB-$releasever
+  - name: docker-ce-stable
+    baseurl: https://download.docker.com/linux/centos/9/$basearch/stable
+
+# Pypi repository configuration
+pypi_repository:
+  index_url: https://repo.example.com/repository/pypi/simple
+  trusted_host: repo.example.com
+
+# Required OS packages to be installed 
+os_packages:
+  - vim
+  - git
+  - bash-completion
+  - lynis
+  - net-tools
+  - htop
+  - sysstat
+  - fio
+  - lvm2
+  - python3-pip
+  - python3.12
+  - python3.12-pip
+  - tmux
+  - lsof
+  - telnet
+  - zabbix-agent2
+
+# Required Python packages to be installed 
+pypi_packages:
+  - PyYAML>=5.3.1
+  - docker
+  - docker-compose
+
+# System upgrade configuration
+system_upgrade: true
+## Can be: on-upgrade, always, never
+system_upgrade_reboot: never
+
+# Zabbix agent2 configuration
+zabbix:
+  servers:
+    - 192.168.10.101
+    - 192.168.10.102
+  active_checks: true
+
+# Systemd services to be enabled and started
+enable_services:
+  - chronyd
+  - sshd
+  - firewalld
+  - zabbix-agent2
+
+# Firewalld rules
+ssh_server_ports: ["2222"]
+kube_network_subnets:
+  - "11.233.0.0/18"
+  - "11.233.64.0/18"

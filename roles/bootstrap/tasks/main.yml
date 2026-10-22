@@ -1,0 +1,132 @@
+- name: Bootstrap | Set dns servers in /etc/resolv.conf
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ item }}"
+    insertafter: EOF
+    state: present
+  loop: "{{ default_dns }}"
+  when: default_dns is defined and default_dns | length > 0
+  tags:
+    - bootstrap
+    - dns
+
+- name: Bootstrap | Trust CA certificate
+  include_tasks: update-ca-trust.yml
+  when: trusted_ca_crt is defined and trusted_ca_crt | length > 0
+  tags:
+    - bootstrap
+    - ca-trust
+
+- name: Bootstrap | Set sysctl parameters permanently
+  ansible.builtin.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-ansible.conf
+  become: true
+  loop: "{{ sysctl }}"
+  loop_control:
+    loop_var: item
+  when: sysctl is defined and sysctl | length > 0
+  tags:
+    - bootstrap
+    - sysctl
+
+- name: Bootstrap | Set nofile and nproc limits permanently
+  ansible.builtin.blockinfile:
+    path: /etc/security/limits.d/99-ansible-limits.conf
+    create: yes
+    mode: '0644'
+    block: |
+      * soft nofile {{ limits.nofile.soft }}
+      * hard nofile {{ limits.nofile.hard }}
+      * soft nproc  {{ limits.nproc.soft }}
+      * hard nproc  {{ limits.nproc.hard }}
+    marker: "# {mark} ANSIBLE MANAGED LIMITS"
+  become: true
+  when: limits is defined and limits | length > 0
+
+- name: Bootstrap | Load or unload kernel modules
+  include_tasks: kernel-modules.yml
+  when: kernel_modules is defined and kernel_modules | length > 0
+  tags:
+    - bootstrap
+    - modules
+
+- name: Bootstrap | Add DNF repositories
+  when:
+  - ansible_os_family == "RedHat"
+  include_tasks: dnf-repo.yml
+  tags:
+    - bootstrap
+    - dnf
+    - repository
+
+- name: Bootstrap | Add pypi repository
+  ansible.builtin.template:
+    src: pip.conf.j2
+    dest: /etc/pip.conf
+  tags:
+    - bootstrap
+    - repository
+
+- name: Bootstrap | Install required OS packages
+  ansible.builtin.package:
+    name: "{{ os_packages }}"
+    state: present
+  tags:
+    - bootstrap
+    - packages
+
+- name: Bootstrap | Install required python packages
+  ansible.builtin.pip:
+    name: "{{ pypi_packages }}"
+  tags:
+    - bootstrap
+    - packages
+
+- name: Bootstrap | APT upgrade
+  when:
+  - system_upgrade
+  - ansible_os_family == "Debian"
+  include_tasks: apt.yml
+  tags:
+    - bootstrap
+    - system-upgrade
+    - system-upgrade-apt
+
+- name: Bootstrap | DNF upgrade
+  when:
+  - system_upgrade
+  - ansible_os_family == "RedHat"
+  include_tasks: dnf.yml
+  tags:
+    - bootstrap
+    - system-upgrade
+    - system-upgrade-dnf
+
+- name: Bootstrap | Install and configure zabbix_agent2
+  include_tasks: zabbix-agent2.yml
+  when: zabbix is defined and zabbix | length > 0
+  tags:
+    - bootstrap
+    - zabbix-agent2
+
+- name: Bootstrap | Ensure systemd service is enabled and started
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ enable_services }}"
+  tags:
+    - bootstrap
+
+- name: Bootstrap | Apply firewall rules (RHEL)
+  import_tasks: firewalld.yml
+  when:
+  - system_upgrade
+  - ansible_os_family == "RedHat"
+  tags:
+    - bootstrap
+    - firewalld

@@ -1,0 +1,17 @@
+# Managed by Ansible - do not edit manually
+{% if yum_repositories is defined %}
+{% for repo in yum_repositories %}
+[{{ repo.name }}]
+name={{ repo.name }} - $basearch $releasever
+{% if repo.metalink is defined %}
+metalink={{ repo.metalink }}
+{% elif repo.mirrorlist is defined %}
+mirrorlist={{ repo.mirrorlist }}
+{% else %}
+baseurl={{ repo.baseurl }}
+{% endif %}
+enabled=1
+gpgcheck=0
+
+{% endfor %}
+{% endif %}

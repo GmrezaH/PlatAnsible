@@ -1,0 +1,12 @@
+PidFile=/run/zabbix/zabbix_agent2.pid\
+LogFile=/var/log/zabbix/zabbix_agent2.log\
+LogFileSize=128\
+Server={{ zabbix.servers | join(',') }}\
+{% if zabbix.active_checks | bool %}\
+ServerActive={{ zabbix.servers | join(';') }}\
+{% endif %}\
+PluginSocket=/run/zabbix/agent.plugin.sock\
+#UserParameter=system.service,cat /etc/systemservice\
+ControlSocket=/run/zabbix/agent.sock\
+Include=/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\
+Include=/etc/zabbix/zabbix_agent2.d/*.conf\

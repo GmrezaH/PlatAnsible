@@ -1,0 +1,4 @@
+# Managed by Ansible - do not edit manually
+{% for ns in default_dns %}
+nameserver {{ ns }}
+{% endfor %}

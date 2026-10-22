@@ -1,0 +1,35 @@
+---
+- name: System upgrade | DNF upgrade all packages  # noqa package-latest
+  ansible.builtin.dnf:
+    name: '*'
+    state: latest
+  register: dnf_upgrade
+  tags:
+    - system-upgrade
+
+- name: System upgrade | Reboot after DNF upgrade  # noqa no-handler
+  when:
+    - dnf_upgrade.changed or system_upgrade_reboot == 'always'
+    - system_upgrade_reboot != 'never'
+  reboot:
+  tags:
+    - system-upgrade
+
+- name: System upgrade | Remove default repo files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/yum.repos.d/epel.repo
+    - /etc/yum.repos.d/epel-cisco-openh264.repo
+    - /etc/yum.repos.d/epel-testing.repo
+    - /etc/yum.repos.d/rocky.repo
+    - /etc/yum.repos.d/rocky-addons.repo
+    - /etc/yum.repos.d/rocky-devel.repo
+    - /etc/yum.repos.d/rocky-extras.repo
+    - /etc/yum.repos.d/rocky-security.repo
+  when:
+  - ansible_os_family == "RedHat"
+  tags:
+    - bootstrap
+    - repository
